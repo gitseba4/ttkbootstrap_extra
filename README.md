@@ -34,7 +34,7 @@ Dodatkowo w przypadku przekazania danych składających się z więcej niż dwó
 cb = ttke.Combobox(root, values_ext=dane, column_id=2, column_value=5) # dla wartości w mysql cursor dictionary=False oraz named_tuple=False 
 cb = ttke.Combobox(root, values_ext=dane, column_id='id', column_value='nazwa') # dla wartości w mysql cursor dictionary=True lub named_tuple=True 
 ```
-Możemy także określić, czy dopuszczamy możliwość nie wybrania żadnej z wartości (NULL w MySQL, None w Python):
+Możemy także określić, czy dopuszczamy możliwość nie wybrania żadnej z wartości (NULL w MySQL, None w Python). Odpowiada za to parametr `allow_none`:
 ```python
 cb = ttke.Combobox(root, values_ext=dane, allow_none=True)
 ```
