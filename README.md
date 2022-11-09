@@ -8,7 +8,7 @@ Biblioteka rozszerza funkcjonalność 3 komponentów ttkbootstrap:
 oraz dodaje nowy komponent:
 - ValuesEntry
 
-Biliotekę importujemy w następujący sposób:
+Bibliotekę importujemy w następujący sposób:
 ```python
 import ttkbootstrap_extra as ttke
 ```
@@ -28,4 +28,9 @@ Teraz możemy utworzyć nowy komponent przekazując listę przez parametr `value
 cb = ttke.Combobox(root, values_ext=producenci)
 sb = ttke.Spinbox(root, values_ext=producenci)
 ve = ttke.ValuesEntry(root, values_ext=producenci)
+```
+Dodatkowo w przypadku przekazania danych składających się z więcej niż dwóch kolumn możemy wskazać, która kolumna zawiera identyfikator z bazy danych (`column_id`), a która wartość do wyświetlenia w komponencie (`column_value`):
+```python
+cb = ttke.Combobox(root, values_ext=dane, column_id=2, column_value=5) # dla wartości w mysql cursor dictionary=False oraz named_tuple=False 
+cb = ttke.Combobox(root, values_ext=dane, column_id='id', column_value='nazwa') # dla wartości w mysql cursor dictionary=True lub named_tuple=True 
 ```
