@@ -38,3 +38,24 @@ Możemy także określić, czy dopuszczamy możliwość nie wybrania żadnej z w
 ```python
 cb = ttke.Combobox(root, values_ext=dane, allow_none=True)
 ```
+Oprócz nowych parametrów komponenty wspierają także poprzednie funkcjonalności, jak np. opcjonalne `bootstyle` lub `width`.
+```python
+sb = ttke.Spinbox(root, values_ext=dane, bootstyle='success', width=30)
+```
+Konfiguracji już istniejącego komponentu możemy dokonać poprzez metodę `configure`, np:
+```python
+cb.configure(values_ext=dane, column_id='pracownik_id', bootstyle='danger')
+```
+Każdy z powyższych komponentów udostępnia także metody służące do pobrania informacji dotyczących wybranego elementu:
+- `get_id()` - zwraca identyfikator z bazy danych dla zaznaczonej pozycji (na podstawie parametru `column_id`)
+```python
+cb.get_id() => 4
+```
+- `get_value()` - zwraca wartość dla zaznaczonej pozycji (na podstawie parametru `column_value`)
+```python
+cb.get_value() => 'Opel'
+```
+- `get_item()` - zwraca zaznaczony element (w zależności od mysql cursor krotkę, nazwaną krotkę lub słownik)
+```python
+cb.get_item() => {'id': 4, 'nazwa': 'Opel'}
+```
