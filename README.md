@@ -38,7 +38,7 @@ Możemy także określić, czy dopuszczamy możliwość nie wybrania żadnej z w
 ```python
 cb = ttke.Combobox(root, values_ext=dane, allow_none=True)
 ```
-Oprócz nowych parametrów komponenty wspierają także poprzednie funkcjonalności, jak np. opcjonalne `bootstyle` lub `width`.
+Oprócz nowych parametrów komponenty wspierają także poprzednie funkcjonalności ttkbootstrap, jak np. opcjonalne `bootstyle` lub `width`.
 ```python
 sb = ttke.Spinbox(root, values_ext=dane, bootstyle='success', width=30)
 ```
@@ -58,4 +58,46 @@ cb.get_value() => 'Opel'
 - `get_item()` - zwraca zaznaczony element (w zależności od mysql cursor krotkę, nazwaną krotkę lub słownik)
 ```python
 cb.get_item() => {'id': 4, 'nazwa': 'Opel'}
+```
+- `set_by_id(id)` - ustawia wartość komponentu na podstawie identyfikatora z bazy
+```python
+cb.set_by_id(2)
+```
+- `set_by_value(value)` - ustawia wartość komponentu na podstawie nazwy
+```python
+cb.set_by_value('Ford')
+```
+### TableviewExt
+Komponent umożliwia utworzenie tabeli na podstawie danych z bazy. Działa dla każdej konfiguracji mysql cursor (dictionary=True lub named_tuple=True lub żadne z powyższych). Aby utworzyć tabelę musimy w konstruktorze przekazać dane z bazy poprzez parametr `values_ext`, np:
+```python
+tv = ttke.TableviewExt(root, values_ext=dane)
+```
+Dodatkowo w przypadku danych typu krotki (dla mysql cursor dictionary=False i named_tuple=False) możemy przekazać listę kolumn poprzez parametr `coldata`:
+```python
+tv = ttke.TableviewExt(root, values_ext=dane, coldata=['id', 'nazwa', 'data'])
+```
+Możemy także wskazać, która z kolumn zawiera daną będącą identyfikatorem z bazy danych poprzez parametr `column_id`:
+```python
+tv = ttke.TableviewExt(root, values_ext=dane, column_id='pojazd_id')
+```
+Oprócz tego dysponujemy także standardowymi parametrami komponentu z biblioteki ttkbootstrap, np:
+```python
+tv = ttke.TableviewExt(root, values_ext=dane, 'bootstyle'='primary', autofit=True, height=15)
+```
+Konfiguracja komponentu odbywa się poprzez metodę `configure`, np:
+```python
+tv.configure(values_ext=dane, searchable=True)
+```
+Oprócz tego dysponujemy 3 nowymi metodami dla komponentu:
+- `reload_data(values_ext)` - powoduje przeładowanie tabeli nowymi/zaktualizowanymi danymi
+```python
+tv.reload_data(dane)
+```
+- `get_selected_rows(only_one_row)` - zwraca zaznaczone wiersze w tabeli lub zaznaczony wiersz, jeśli ustawiono only_one_row=True. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox
+```python
+tv.get_selected_rows(False) => [(2,'Ford'),(4,'Opel)]
+```
+- `get_selected_ids(only_one_row)` - zwraca identyfikatory zaznaczonych wierszy w tabeli lub zaznaczonego wiersza, jeśli ustawiono only_one_row=True. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox. Konieczne jest ustalenie dla komponentu, która kolumna zawiera identyfikator (parametr `column_id`)
+```python
+tv.get_selected_ids(True) => 3
 ```
