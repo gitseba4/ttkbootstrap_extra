@@ -96,8 +96,10 @@ tv.reload_data(dane)
 - `get_selected_rows(only_one_row)` - zwraca zaznaczone wiersze w tabeli lub zaznaczony wiersz, jeśli ustawiono only_one_row=True. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox
 ```python
 tv.get_selected_rows(False) => [(2,'Ford'),(4,'Opel)]
+tv.get_selected_rows(True) => (2,'Ford')
 ```
 - `get_selected_ids(only_one_row)` - zwraca identyfikatory zaznaczonych wierszy w tabeli lub zaznaczonego wiersza, jeśli ustawiono only_one_row=True. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox. Konieczne jest ustalenie dla komponentu, która kolumna zawiera identyfikator (parametr `column_id`)
 ```python
-tv.get_selected_ids(True) => 3
+tv.get_selected_ids(False) => [2,4]
+tv.get_selected_ids(True) => 2
 ```
