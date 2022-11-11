@@ -240,8 +240,8 @@ class ExtendValuesWidget:
 class Combobox(ExtendValuesWidget, ttk.Combobox):
     """Definicja nowego komponentu Combobox umożliwiającego korzystanie ze słowników lub list złożonych"""
 
-    def __init__(self, master=None, values_ext=None, column_id: str = None, column_value: str = None,
-                 allow_none: bool = False, bootstyle: str = 'primary', width: int = 20):
+    def __init__(self, master=None, values_ext=None, column_id: Union[str, int] = None, column_value: Union[
+        str, int] = None, allow_none: bool = False, bootstyle: str = 'primary', width: int = 20):
         ExtendValuesWidget.__init__(self, values_ext, column_id, column_value, allow_none)
         ttk.Combobox.__init__(self, master, values=self._values_show, bootstyle=bootstyle, width=width)
 
@@ -258,8 +258,7 @@ class Spinbox(ExtendValuesWidget, ttk.Spinbox):
     """Definicja nowego komponentu Spinbox umożliwiającego korzystanie ze słowników lub list złożonych"""
 
     def __init__(self, master=None, values_ext=None, column_id: Union[str, int] = None, column_value: Union[
-        str, int] = None,
-                 allow_none: bool = False, bootstyle: str = 'primary', width: int = 20):
+        str, int] = None, allow_none: bool = False, bootstyle: str = 'primary', width: int = 20):
         ExtendValuesWidget.__init__(self, values_ext, column_id, column_value, allow_none)
         ttk.Spinbox.__init__(self, master, values=self._values_show, bootstyle=bootstyle, width=width)
 
@@ -275,8 +274,7 @@ class Spinbox(ExtendValuesWidget, ttk.Spinbox):
 class ValuesEntry(ExtendValuesWidget, ttk.Frame):
 
     def __init__(self, master=None, values_ext=None, column_id: Union[str, int] = None, column_value: Union[
-        str, int] = None,
-                 allow_none: bool = False, bootstyle: str = 'primary', width: int = 10):
+        str, int] = None, allow_none: bool = False, bootstyle: str = 'primary', width: int = 10):
         ExtendValuesWidget.__init__(self, values_ext, column_id, column_value, allow_none)
         ttk.Frame.__init__(self, master)
 
@@ -568,13 +566,15 @@ class TableviewExt(Tableview):
             values_ext = values_ext if values_ext is not None else self._source_values_data
             column_id = column_id if column_id is not None else self._column_id
 
-            self.delete_rows()
             coldata, rowdata = self._config(coldata, values_ext, column_id)
-            Tableview.configure(self, coldata=coldata, rowdata=rowdata, cnf=cnf, **kwargs)
-            self.load_table_data()
-            return
+            self.build_table_data(coldata, rowdata)
 
         Tableview.configure(self, cnf, **kwargs)
+
+    def reload_data(self, values_ext: Union[list, tuple]):
+        """Przeładowanie tabeli na podstawie nowego/zaktualizowanego zestawu danych"""
+
+        self.configure(values_ext=values_ext)
 
     def get_selected_rows(self, only_one_row=False):
         """Zwrócenie wartości zaznaczonego wiersza/wierszy"""
