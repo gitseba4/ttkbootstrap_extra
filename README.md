@@ -23,7 +23,7 @@ Wszystkie 3 komponenty umożliwiają wybór jednej z wielu wartości przekazanyc
   (4, 'Opel')
 ]
 ```
-Teraz możemy utworzyć nowy komponent przekazując listę przez parametr `values_ext`, przykładowo:
+Teraz możemy utworzyć nowy komponent przekazując listę poprzez parametr `values_ext`, przykładowo:
 ```python
 cb = ttke.Combobox(root, values_ext=producenci)
 sb = ttke.Spinbox(root, values_ext=producenci)
