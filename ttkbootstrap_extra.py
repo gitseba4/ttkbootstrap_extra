@@ -210,10 +210,7 @@ class ExtendValuesWidget:
         """Ustawienie wartości kontrolki na podstawie id (błąd jeśli nie znaleziono)"""
 
         for row in self._values_lst:
-            if self._dict_rows:
-                r_id = row[self._column_id]
-                r_value = row[self._column_value]
-            elif self._namedtuple_rows:
+            if self._namedtuple_rows:
                 r_id = getattr(row, self._column_id)
                 r_value = getattr(row, self._column_value)
             else:
@@ -230,7 +227,12 @@ class ExtendValuesWidget:
         """Ustawienie wartości kontrolki na podstawie tekstu (błąd jeśli nie znaleziono)"""
 
         for row in self._values_lst:
-            if row[self._column_value if self._namedtuple_rows else self._column_value] == value:
+            if self._namedtuple_rows:
+                r_value = getattr(row, self._column_value)
+            else:
+                r_value = row[self._column_value]
+
+            if r_value == value:
                 self.set(value)
                 return
 
@@ -520,14 +522,15 @@ class TableviewExt(Tableview):
                     for column in row.keys():
                         rowdata[-1].append(row[column])
 
-                if column_id is not None and type(column_id) == 'str':
+                if column_id is not None and type(column_id) == str:
                     i = 0
                     for column in values_ext[0].keys():
                         if column_id == column:
                             column_id = i
                             break
                         i += 1
-                    raise Exception(f"Wskazana kolumna {column_id} nie znajduje się w przekazanych danych!")
+                    if type(column_id) != int:
+                        raise Exception(f"Wskazana kolumna {column_id} nie znajduje się w przekazanych danych!")
 
             """Obsługa nazwanych krotek"""
             if data_type == 'Row':
@@ -539,14 +542,15 @@ class TableviewExt(Tableview):
                     for column in row._fields:
                         rowdata[-1].append(getattr(row, column))
 
-                if column_id is not None and type(column_id) == 'str':
+                if column_id is not None and type(column_id) == str:
                     i = 0
                     for column in values_ext[0]._fields:
                         if column_id == column:
                             column_id = i
                             break
                         i += 1
-                    raise Exception(f"Wskazana kolumna {column_id} nie znajduje się w przekazanych danych!")
+                    if type(column_id) != int:
+                        raise Exception(f"Wskazana kolumna {column_id} nie znajduje się w przekazanych danych!")
 
             if column_id is not None and column_id >= len(rowdata[0]):
                 raise Exception(
@@ -613,6 +617,9 @@ class TableviewExt(Tableview):
 
         selected_rows = self.get_selected_rows(only_one_id)
 
+        if selected_rows is None:
+            return
+
         """Zwrócenie jednego id"""
         if only_one_id:
             return selected_rows[self.__column_id]
@@ -621,6 +628,6 @@ class TableviewExt(Tableview):
         res_ids = []
 
         for i in selected_rows:
-            res_ids.append(selected_rows[self.__column_id])
+            res_ids.append(i[self.__column_id])
 
         return res_ids
