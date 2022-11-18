@@ -206,7 +206,7 @@ class ExtendValuesWidget:
 
         raise Exception("Nie znaleziono danych dla wskazanego rekordu!")
 
-    def set_by_id(self, id):
+    def set_by_id(self, id: Union[int, str]):
         """Ustawienie wartości kontrolki na podstawie id (błąd jeśli nie znaleziono)"""
 
         for row in self._values_lst:
@@ -418,7 +418,7 @@ class ValuesEntry(ExtendValuesWidget, ttk.Frame):
 
         return self.__ret_item
 
-    def set_by_id(self, id):
+    def set_by_id(self, id: Union[int, str]):
         """Ustawienie wartości kontrolki na podstawie id (błąd jeśli nie znaleziono)"""
 
         self.__show_list_window()
@@ -493,6 +493,7 @@ class TableviewExt(Tableview):
             self._coldata = coldata[:]
         self._source_values_data = values_ext[:]
         self._column_id = column_id
+        self._column_id_name = column_id
 
         if len(values_ext) > 0:
             """Sprawdzenie typu danych"""
@@ -501,6 +502,8 @@ class TableviewExt(Tableview):
 
             if data_type not in ('tuple', 'list', 'dict', 'Row'):
                 raise Exception(f"Niepoprawny typ danych: {data_type}!")
+
+            self._raw_data_type = data_type
 
             """Obsługa krotek i list"""
             if data_type in ('tuple', 'list'):
@@ -560,6 +563,27 @@ class TableviewExt(Tableview):
 
         return coldata, rowdata
 
+    def _get_raw_data(self, selected_row_id):
+        """Pobranie źródłowych danych z bazy (w formie słownika, nazwanych krotek itp)"""
+
+        if self._raw_data_type == 'Row':
+            """namedtuples"""
+            for i in self._source_values_data:
+                if getattr(i, self._column_id_name) == selected_row_id:
+                    return i
+        elif self._raw_data_type == 'dict':
+            """dict"""
+            for i in self._source_values_data:
+                if i[self._column_id_name] == selected_row_id:
+                    return i
+        else:
+            """lists, tuples"""
+            for i in self._source_values_data:
+                if i[self._column_id] == selected_row_id:
+                    return i
+
+        raise Exception(f"Nie znaleziono źródłowych danych o identyfikatorze: {selected_row_id}!")
+
     def configure(self, coldata: Union[list, tuple, None] = None, values_ext: Union[list, tuple, None] = None,
                   column_id: Union[int, str] = None, cnf=None,
                   **kwargs):
@@ -580,8 +604,11 @@ class TableviewExt(Tableview):
 
         self.configure(values_ext=values_ext)
 
-    def get_selected_rows(self, only_one_row=False):
+    def get_selected_rows(self, only_one_row: bool = False, raw_data: bool = False):
         """Zwrócenie wartości zaznaczonego wiersza/wierszy"""
+
+        if raw_data and self.__column_id is None:
+            raise Exception("Dla parametru raw_data=True konieczne jest ustawienie parametru 'column_id'!")
 
         selected_rows = self.view.selection()
 
@@ -599,17 +626,25 @@ class TableviewExt(Tableview):
 
         """Zwrócenie jednego rekordu"""
         if only_one_row:
-            return self.get_row(iid=selected_rows[0]).values
+            if raw_data:
+                selected_row_id = self.get_row(iid=selected_rows[0]).values[self.__column_id]
+                return self._get_raw_data(selected_row_id)
+            else:
+                return self.get_row(iid=selected_rows[0]).values
 
         """Zwrócenie wielu rekordów"""
         res_rows = []
 
         for i in selected_rows:
-            res_rows.append(self.get_row(iid=i).values)
+            if raw_data:
+                selected_row_id = self.get_row(iid=i).values[self.__column_id]
+                res_rows.append(self._get_raw_data(selected_row_id))
+            else:
+                res_rows.append(self.get_row(iid=i).values)
 
         return res_rows
 
-    def get_selected_ids(self, only_one_id=False):
+    def get_selected_ids(self, only_one_id: bool = False):
         """Zwrócenie identyfikatorów zaznaczonych rekordów (jeśli ustawiono parametr column_id)"""
 
         if self.__column_id is None:
