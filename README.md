@@ -93,10 +93,10 @@ Oprócz tego dysponujemy 3 nowymi metodami dla komponentu:
 ```python
 tv.reload_data(dane)
 ```
-- `get_selected_rows(only_one_row)` - zwraca zaznaczone wiersze w tabeli lub zaznaczony wiersz, jeśli ustawiono only_one_row=True. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox
+- `get_selected_rows(only_one_row, raw_data)` - zwraca zaznaczone wiersze w tabeli lub zaznaczony wiersz, jeśli ustawiono only_one_row=True. Dla parametru raw_data=True zwraca dane dokładnie w takim formacie jak ustawiono w mysql cursor. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox
 ```python
-tv.get_selected_rows(False) => [(2,'Ford'),(4,'Opel)]
-tv.get_selected_rows(True) => (2,'Ford')
+tv.get_selected_rows(False, True) => [{'id': 2, 'nazwa': 'Ford'}, {'id': 4, 'nazwa': 'Opel'}]
+tv.get_selected_rows(True, False) => (2,'Ford')
 ```
 - `get_selected_ids(only_one_row)` - zwraca identyfikatory zaznaczonych wierszy w tabeli lub zaznaczonego wiersza, jeśli ustawiono only_one_row=True. W przypadku błędów wyświetlany jest stosowny komunikat Messagebox. Konieczne jest ustalenie dla komponentu, która kolumna zawiera identyfikator (parametr `column_id`)
 ```python
