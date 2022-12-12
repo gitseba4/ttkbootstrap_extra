@@ -6,10 +6,17 @@ Biblioteka rozszerza funkcjonalność 3 komponentów ttkbootstrap:
 ![Combobox](/img/cb.png "Combobox")
 
 - Spinbox
+
+![Spinbox](/img/sb.png "Spinbox")
+
 - Tableview
+
+![Tableview](/img/tv.png "Tableview")
 
 oraz dodaje nowy komponent:
 - ValuesEntry
+
+![ValuesEntry](/img/ve.png "ValuesEntry")
 
 Bibliotekę importujemy w następujący sposób:
 ```python
