@@ -2,6 +2,7 @@
 
 Biblioteka rozszerza funkcjonalność 3 komponentów ttkbootstrap:
 - Combobox
+![Combobox](/img/cb.png "Combobox")
 - Spinbox
 - Tableview
 
