@@ -238,6 +238,18 @@ class ExtendValuesWidget:
 
         raise Exception(f"Nie znaleziono wartości {value}!")
 
+    def set_first_value(self):
+        """Ustawienie pierwszej wartości z kontrolki jako domyślnie wybranej"""
+
+        if len(self._values_lst) == 0:
+            return
+
+        if self._namedtuple_rows:
+            r_value = getattr(self._values_lst[0], self._column_value)
+        else:
+            r_value = self._values_lst[0][self._column_value]
+
+        self.set(r_value)
 
 class Combobox(ExtendValuesWidget, ttk.Combobox):
     """Definicja nowego komponentu Combobox umożliwiającego korzystanie ze słowników lub list złożonych"""
@@ -246,6 +258,7 @@ class Combobox(ExtendValuesWidget, ttk.Combobox):
         str, int] = None, allow_none: bool = False, bootstyle: str = 'primary', width: int = 20):
         ExtendValuesWidget.__init__(self, values_ext, column_id, column_value, allow_none)
         ttk.Combobox.__init__(self, master, values=self._values_show, bootstyle=bootstyle, width=width)
+        self.set_first_value()
 
     def configure(self, cnf=None, values_ext: Union[list, tuple, dict] = None, column_id: Union[str, int] = None,
                   column_value: Union[str, int] = None,
@@ -254,6 +267,7 @@ class Combobox(ExtendValuesWidget, ttk.Combobox):
 
         ExtendValuesWidget._config(self, values_ext, column_id, column_value, allow_none)
         ttk.Combobox.configure(self, cnf, values=self._values_show, **kw)
+        self.set_first_value()
 
 
 class Spinbox(ExtendValuesWidget, ttk.Spinbox):
@@ -263,6 +277,7 @@ class Spinbox(ExtendValuesWidget, ttk.Spinbox):
         str, int] = None, allow_none: bool = False, bootstyle: str = 'primary', width: int = 20):
         ExtendValuesWidget.__init__(self, values_ext, column_id, column_value, allow_none)
         ttk.Spinbox.__init__(self, master, values=self._values_show, bootstyle=bootstyle, width=width)
+        self.set_first_value()
 
     def configure(self, cnf=None, values_ext: Union[list, tuple, dict] = None, column_id: Union[str, int] = None,
                   column_value: Union[str, int] = None,
@@ -271,6 +286,7 @@ class Spinbox(ExtendValuesWidget, ttk.Spinbox):
 
         ExtendValuesWidget._config(self, values_ext, column_id, column_value, allow_none)
         ttk.Spinbox.configure(self, cnf, values=self._values_show, **kw)
+        self.set_first_value()
 
 
 class ValuesEntry(ExtendValuesWidget, ttk.Frame):
@@ -297,6 +313,7 @@ class ValuesEntry(ExtendValuesWidget, ttk.Frame):
         self.__button = ttk.Button(self, bootstyle=self.__bootstyle, image=self.__list_icon,
                                    command=self.__show_list_window)
         self.__button.pack(side='left')
+        self.set_first_value()
 
     def __show_list_window(self):
         """Utworzenie okna z listą wartości do wyboru"""
@@ -447,6 +464,19 @@ class ValuesEntry(ExtendValuesWidget, ttk.Frame):
         self.__list_window.destroy()
 
         raise Exception(f"Nie znaleziono wartości {value}!")
+
+    def set_first_value(self):
+        """Ustawienie pierwszej wartości z kontrolki jako domyślnie wybranej"""
+
+        if len(self._values_lst) == 0:
+            return
+
+        if self._namedtuple_rows:
+            r_id = getattr(self._values_lst[0], self._column_id)
+        else:
+            r_id = self._values_lst[0][self._column_id]
+
+        self.set_by_id(r_id)
 
 
 class TableviewExt(Tableview):
