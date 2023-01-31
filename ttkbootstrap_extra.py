@@ -484,7 +484,7 @@ class TableviewExt(Tableview):
 
     def __init__(self,
                  master=None,
-                 coldata: Union[list, tuple, None] = [],
+                 coldata: Union[list, tuple] = [],
                  values_ext: Union[list, tuple] = [],
                  column_id: Union[int, str] = None,
                  bootstyle='default',
@@ -497,6 +497,10 @@ class TableviewExt(Tableview):
                  height=10,
                  delimiter=",",
                  ):
+        
+        coldata = coldata[:]
+        values_ext = values_ext[:]
+        
         coldata, rowdata = self._config(coldata, values_ext, column_id)
 
         """Inicjalizujemy komponent tabeli"""
