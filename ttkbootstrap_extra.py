@@ -103,6 +103,8 @@ class ExtendValuesWidget:
 
         """Walidacja parametrów column_id i column_value dla danych słownikowych"""
         if self._dict_rows:
+            self.__trySetColumnIdAndValue(values_ext, 'dict')
+
             if type(self._column_id) != str:
                 raise Exception(f"Parametr 'column_id' musi być typu tekstowego!")
             if type(self._column_value) != str:
@@ -118,6 +120,8 @@ class ExtendValuesWidget:
 
         """Walidacja parametrów column_id i column_value dla danych w nazwanych krotkach"""
         if self._namedtuple_rows:
+            self.__trySetColumnIdAndValue(values_ext, 'namedtuples')
+
             if type(self._column_id) != str:
                 raise Exception(f"Parametr 'column_id' musi być typu tekstowego!")
             if type(self._column_value) != str:
@@ -136,11 +140,7 @@ class ExtendValuesWidget:
             return
 
         """Walidacja parametrów column_id i column_value dla zwykłych danych"""
-
-        if type(self._column_id) != int:
-            raise Exception(f"Parametr 'column_id' musi być typu liczbowego!")
-        if type(self._column_value) != int:
-            raise Exception(f"Parametr 'column_value' musi być typu liczbowego!")
+        self.__trySetColumnIdAndValue(values_ext, 'tuples')
 
         if not self._empty_source_data:
             if self._column_id > len(values_ext[-1]):
@@ -148,6 +148,63 @@ class ExtendValuesWidget:
 
             if self._column_value > len(values_ext[-1]):
                 raise Exception(f"Parametr 'column_value' ma wartość wyższą niż ilość kolumn w danych wejściowych!")
+
+    def __trySetColumnIdAndValue(self, values_ext, values_ext_type):
+        """Próba ustawienia wartości column_id oraz column_value na podstawie danych wejściowych"""
+
+        if self._column_id is not None and self._column_value is not None:
+            return
+
+        if values_ext_type == 'tuples':
+            """Jeśli zwykłe dane (krotki) to ustawiamy odpowiednio kolumny [0] i [1]"""
+            if self._column_id is None:
+                self._column_id = 0
+                print(
+                    f"Nie ustawiono wartości dla parametru 'column_id' - kolumna została ustalona automatycznie: [{self._column_id}]")
+            if self._column_value is None:
+                self._column_value = 1
+                print(
+                    f"Nie ustawiono wartości dla parametru 'column_value' - kolumna została ustalona automatycznie: [{self._column_value}]")
+
+            return
+
+        if len(values_ext) == 0:
+            return
+
+        column_names = []
+
+        if values_ext_type == 'dict':
+            column_names = list(values_ext[-1].keys())
+        elif values_ext_type == 'namedtuples':
+            column_names = values_ext[-1]._fields
+
+        if self._column_id is None:
+            """W pierwszej koleności szukamy kolumny 'id'"""
+            for i in column_names:
+                if 'id' == i.lower():
+                    self._column_id = i
+                    print(
+                        f"Nie ustawiono wartości dla parametru 'column_id' - kolumna została ustalona automatycznie: {self._column_id}")
+                    break
+            if self._column_id is None:
+                """W drugiej kolumności szukamy kolumny zawierającej id w nazwie"""
+                for i in column_names:
+                    col = i.lower()
+                    if col.startswith('id') or col.endswith('id'):
+                        self._column_id = i
+                        print(
+                            f"Nie ustawiono wartości dla parametru 'column_id' - kolumna została ustalona automatycznie: {self._column_id}")
+                        break
+
+        if self._column_value is None:
+            """Szukamy pierwszej kolumny niezawierającej id w nazwie"""
+            for i in column_names:
+                col = i.lower()
+                if not (col.startswith('id') or col.endswith('id')):
+                    self._column_value = i
+                    print(
+                        f"Nie ustawiono wartości dla parametru 'column_value' - kolumna została ustalona automatycznie: {self._column_value}")
+                    break
 
     def __set_values_to_show(self):
         """Ustawienie danych do wyświetlania w kontrolce"""
@@ -181,9 +238,9 @@ class ExtendValuesWidget:
         selected_value = self.get()
 
         for row in self._values_lst:
-            if self._namedtuple_rows and getattr(row, self._column_value) == selected_value:
+            if self._namedtuple_rows and str(getattr(row, self._column_value)) == selected_value:
                 return getattr(row, self._column_id)
-            elif not self._namedtuple_rows and row[self._column_value] == selected_value:
+            elif not self._namedtuple_rows and str(row[self._column_value]) == selected_value:
                 return row[self._column_id]
 
         raise Exception("Nie znaleziono identyfikatora dla wskazanego rekordu!")
@@ -199,9 +256,9 @@ class ExtendValuesWidget:
         selected_value = self.get()
 
         for row in self._values_lst:
-            if self._namedtuple_rows and getattr(row, self._column_value) == selected_value:
+            if self._namedtuple_rows and str(getattr(row, self._column_value)) == selected_value:
                 return row
-            elif not self._namedtuple_rows and row[self._column_value] == selected_value:
+            elif not self._namedtuple_rows and str(row[self._column_value]) == selected_value:
                 return row
 
         raise Exception("Nie znaleziono danych dla wskazanego rekordu!")
@@ -250,6 +307,7 @@ class ExtendValuesWidget:
             r_value = self._values_lst[0][self._column_value]
 
         self.set(r_value)
+
 
 class Combobox(ExtendValuesWidget, ttk.Combobox):
     """Definicja nowego komponentu Combobox umożliwiającego korzystanie ze słowników lub list złożonych"""
@@ -497,10 +555,10 @@ class TableviewExt(Tableview):
                  height=10,
                  delimiter=",",
                  ):
-        
+
         coldata = coldata[:]
         values_ext = values_ext[:]
-        
+
         coldata, rowdata = self._config(coldata, values_ext, column_id)
 
         """Inicjalizujemy komponent tabeli"""
@@ -541,6 +599,9 @@ class TableviewExt(Tableview):
 
             """Obsługa krotek i list"""
             if data_type in ('tuple', 'list'):
+                if column_id is None:
+                    column_id = self.__trySetColumnId(values_ext, data_type)
+
                 if column_id is not None and type(column_id) != int:
                     raise Exception("Parametr 'column_id' musi być typu liczbowego!")
 
@@ -558,6 +619,9 @@ class TableviewExt(Tableview):
                     rowdata.append([])
                     for column in row.keys():
                         rowdata[-1].append(row[column])
+
+                if column_id is None:
+                    column_id = self.__trySetColumnId(values_ext, data_type)
 
                 if column_id is not None and type(column_id) == str:
                     i = 0
@@ -579,6 +643,9 @@ class TableviewExt(Tableview):
                     for column in row._fields:
                         rowdata[-1].append(getattr(row, column))
 
+                if column_id is None:
+                    column_id = self.__trySetColumnId(values_ext, data_type)
+
                 if column_id is not None and type(column_id) == str:
                     i = 0
                     for column in values_ext[0]._fields:
@@ -596,6 +663,48 @@ class TableviewExt(Tableview):
         self.__column_id = column_id
 
         return coldata, rowdata
+
+    def __trySetColumnId(self, values_ext, values_ext_type):
+        """Próba ustawienia wartości column_id na podstawie danych wejściowych"""
+
+        if values_ext_type in ('tuple', 'list'):
+            """Jeśli zwykłe dane (krotki) to ustawiamy odpowiednio kolumny [0] i [1]"""
+            if self._column_id is None:
+                self._column_id = 0
+                self._column_id_name = 0
+                print(
+                    f"Nie ustawiono wartości dla parametru 'column_id' - kolumna została ustalona automatycznie: [{self._column_id}]")
+            return self._column_id
+
+        if len(values_ext) == 0:
+            return
+
+        column_names = []
+
+        if values_ext_type == 'dict':
+            column_names = list(values_ext[-1].keys())
+        elif values_ext_type == 'Row':
+            column_names = values_ext[-1]._fields
+
+        if self._column_id is None:
+            """W pierwszej koleności szukamy kolumny 'id'"""
+            for i in column_names:
+                if 'id' == i.lower():
+                    self._column_id = i
+                    self._column_id_name = i
+                    print(
+                        f"Nie ustawiono wartości dla parametru 'column_id' - kolumna została ustalona automatycznie: {self._column_id}")
+                    return self._column_id
+            if self._column_id is None:
+                """W drugiej kolumności szukamy kolumny zawierającej id w nazwie"""
+                for i in column_names:
+                    col = i.lower()
+                    if col.startswith('id') or col.endswith('id'):
+                        self._column_id = i
+                        self._column_id_name = i
+                        print(
+                            f"Nie ustawiono wartości dla parametru 'column_id' - kolumna została ustalona automatycznie: {self._column_id}")
+                        return self._column_id
 
     def _get_raw_data(self, selected_row_id):
         """Pobranie źródłowych danych z bazy (w formie słownika, nazwanych krotek itp)"""
